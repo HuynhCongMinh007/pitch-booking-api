@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  username          String    @unique(map: "ix_users_username") @db.VarChar(255)
+  password_hash     String    @db.VarChar(255)
+  email             String    @unique(map: "ix_users_email") @db.VarChar(255)
+  role              String    @default("customer") @db.VarChar(50)
+  is_active         Boolean   @default(true)
+  is_email_verified Boolean   @default(false)
+  full_name         String?   @db.VarChar(255)
+  phone_number      String?   @db.VarChar(20)
+  address           String?   @db.VarChar(255)
+  avatar_url        String?   @db.VarChar(500)
+  date_of_birth     DateTime? @db.Date
+  gender            String?   @db.VarChar(20)
+  bio               String?
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
+
+  refresh_tokens   RefreshToken[]
+  email_otps       EmailOtp[]
+  team_memberships TeamMember[]
+  created_teams    Team[]
+
+  @@index([phone_number], map: "ix_users_phone_number")
+  @@map("users")
+}
+
+model RefreshToken {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  token_hash String    @unique(map: "ix_refresh_tokens_token_hash") @db.VarChar(64)
+  revoked    Boolean   @default(false)
+  revoked_at DateTime? @db.Timestamptz(6)
+  expires_at DateTime  @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "ix_refresh_tokens_user_id")
+  @@map("refresh_tokens")
+}
+
+model EmailOtp {
+  id         String    @id @default(uuid()) @db.Uuid
+  user_id    Int
+  code_hash  String
+  purpose    String    @db.VarChar(30)
+  expires_at DateTime  @db.Timestamptz(6)
+  attempts   Int       @default(0) @db.SmallInt
+  used_at    DateTime? @db.Timestamptz(6)
+  created_at DateTime  @default(now()) @db.Timestamptz(6)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([purpose], map: "ix_email_otps_purpose")
+  @@index([user_id], map: "ix_email_otps_user_id")
+  @@map("email_otps")
+}
+
+model Position {
+  id          Int     @id @default(autoincrement())
+  sport_type  String  @default("FOOTBALL") @db.VarChar(20)
+  pitch_type  String  @db.VarChar(20)
+  code        String  @db.VarChar(20)
+  name        String  @db.VarChar(50)
+  description String? @db.VarChar(255)
+
+  member_associations TeamMemberPosition[]
+
+  @@unique([sport_type, pitch_type, code], map: "uq_positions_sport_pitch_code")
+  @@index([code], map: "ix_positions_code")
+  @@index([pitch_type], map: "ix_positions_pitch_type")
+  @@index([sport_type], map: "ix_positions_sport_type")
+  @@map("positions")
+}
+
+model Team {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(100)
+  description   String?
+  avatar_url    String?  @db.VarChar(255)
+  created_by_id Int
+  is_active     Boolean  @default(true)
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime @default(now()) @updatedAt @db.Timestamptz(6)
+
+  creator User         @relation(fields: [created_by_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  members TeamMember[]
+
+  @@index([created_by_id], map: "ix_teams_created_by_id")
+  @@index([name], map: "ix_teams_name")
+  @@map("teams")
+}
+
+model TeamMember {
+  id        Int      @id @default(autoincrement())
+  team_id   Int
+  user_id   Int
+  role      String   @default("MEMBER") @db.VarChar(20)
+  status    String   @default("ACTIVE") @db.VarChar(20)
+  joined_at DateTime @default(now()) @db.Timestamptz(6)
+
+  team                  Team                 @relation(fields: [team_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user                  User                 @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  position_associations TeamMemberPosition[]
+
+  @@unique([team_id, user_id], map: "uq_team_members_team_user")
+  @@index([team_id], map: "ix_team_members_team_id")
+  @@index([user_id], map: "ix_team_members_user_id")
+  @@map("team_members")
+}
+
+model TeamMemberPosition {
+  team_member_id Int
+  position_id    Int
+  is_primary     Boolean @default(false)
+
+  team_member TeamMember @relation(fields: [team_member_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  position    Position   @relation(fields: [position_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([team_member_id, position_id])
+  @@map("team_member_positions")
+}
