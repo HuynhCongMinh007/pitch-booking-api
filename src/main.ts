@@ -1,16 +1,18 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 
 import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
 import { configureApp } from './app.setup';
-import { settings } from './shared/infrastructure/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   configureApp(app);
   app.enableShutdownHooks();
-  await app.listen(settings.PORT, '0.0.0.0');
+
+  const port = Number(process.env.PORT) || 8000;
+  await app.listen(port, '0.0.0.0');
 }
 
 void bootstrap();
