@@ -7,12 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  CUSTOMER
+  PITCH_OWNER
+  PITCH_STAFF
+  ADMIN
+
+  @@map("user_role")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+
+  @@map("gender")
+}
+
 model User {
   id                Int       @id @default(autoincrement())
   username          String    @unique(map: "ix_users_username") @db.VarChar(255)
   password_hash     String    @db.VarChar(255)
   email             String    @unique(map: "ix_users_email") @db.VarChar(255)
-  role              String    @default("customer") @db.VarChar(50)
+  role              UserRole  @default(CUSTOMER)
   is_active         Boolean   @default(true)
   is_email_verified Boolean   @default(false)
   full_name         String?   @db.VarChar(255)
@@ -20,7 +37,7 @@ model User {
   address           String?   @db.VarChar(255)
   avatar_url        String?   @db.VarChar(500)
   date_of_birth     DateTime? @db.Date
-  gender            String?   @db.VarChar(20)
+  gender            Gender?
   bio               String?
   created_at        DateTime  @default(now()) @db.Timestamptz(6)
   updated_at        DateTime  @default(now()) @updatedAt @db.Timestamptz(6)
@@ -48,10 +65,8 @@ model RefreshToken {
 }
 
 enum OtpPurpose {
-  VERIFY_EMAIL
+  REGISTER
   RESET_PASSWORD
-  CHANGE_PASSWORD
-  TWO_FACTOR_AUTH
 
   @@map("otp_purpose")
 }
