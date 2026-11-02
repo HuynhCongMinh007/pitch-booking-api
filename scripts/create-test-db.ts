@@ -5,10 +5,12 @@
  */
 import { execSync } from 'node:child_process';
 
-import { getTestDatabaseUrl } from '../test/test-database';
+import { getTestDatabaseUrl } from '../test/support/test-database';
 
 const testDatabaseUrl = getTestDatabaseUrl();
-console.log(`Applying migrations to test database ${new URL(testDatabaseUrl).pathname.slice(1)}...`);
+console.log(
+  `Applying migrations to test database ${new URL(testDatabaseUrl).pathname.slice(1)}...`,
+);
 
 // `prisma migrate deploy` creates the database when it does not exist yet
 execSync('npx prisma migrate deploy', {

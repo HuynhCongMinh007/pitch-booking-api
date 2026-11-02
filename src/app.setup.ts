@@ -1,28 +1,11 @@
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { INestApplication } from '@nestjs/common';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
-import type { NextFunction, Request, Response } from 'express';
 
 import { settings } from './shared/infrastructure/config';
-import { HttpExceptionFilter } from './shared/presentation/http-exception.filter';
+import { HttpExceptionFilter, securityHeadersMiddleware } from './shared/presentation';
 
-const SECURITY_HEADERS = {
-  'X-Content-Type-Options': 'nosniff',
-  'X-Frame-Options': 'DENY',
-  'Referrer-Policy': 'strict-origin-when-cross-origin',
-};
-const API_CSP = "default-src 'none'; frame-ancestors 'none'";
-const DOCS_PATHS = ['/docs', '/openapi.json'];
-
-function securityHeaders(req: Request, res: Response, next: NextFunction): void {
-  res.set(SECURITY_HEADERS);
-  if (!DOCS_PATHS.some((path) => req.path.startsWith(path))) {
-    res.set('Content-Security-Policy', API_CSP);
-  }
-  next();
-}
-
-/** Middlewares, CORS, error format and API docs (shared by main.js and the tests). */
+/** Middlewares, CORS, error format and API docs (shared by main.ts and tests). */
 export function configureApp<T extends INestApplication>(app: T): T {
   app.getHttpAdapter().getInstance().disable('x-powered-by');
   app.use(cookieParser());
@@ -32,7 +15,7 @@ export function configureApp<T extends INestApplication>(app: T): T {
     credentials: true,
   });
 
-  app.use(securityHeaders);
+  app.use(securityHeadersMiddleware);
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const document = SwaggerModule.createDocument(

@@ -1,7 +1,7 @@
 {
   "name": "pitch-booking-api",
   "version": "1.0.0",
-  "description": "PitchBooking API (NestJS + Prisma + PostgreSQL)",
+  "description": "PitchBooking API (NestJS + Clean Architecture + DDD + Prisma + PostgreSQL)",
   "private": true,
   "license": "UNLICENSED",
   "type": "commonjs",
@@ -9,12 +9,13 @@
     "node": ">=20"
   },
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "build": "node -e \"fs.rmSync('dist', { recursive: true, force: true })\" && tsc -p tsconfig.build.json",
     "start": "node dist/main.js",
     "start:dev": "nodemon --watch src --ext ts --exec ts-node src/main.ts",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate deploy",
     "test": "jest --runInBand",
+    "test:unit": "jest --runInBand --testPathIgnorePatterns=e2e --testPathIgnorePatterns=infrastructure",
     "test:db": "ts-node scripts/create-test-db.ts",
     "postinstall": "prisma generate",
     "typecheck": "tsc --noEmit"
