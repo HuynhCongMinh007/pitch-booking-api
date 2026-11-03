@@ -1,0 +1,7 @@
+export enum UserRole {
+  CUSTOMER = 'CUSTOMER',
+  PITCH_OWNER = 'PITCH_OWNER',
+  PITCH_STAFF = 'PITCH_STAFF',
+  ADMIN = 'ADMIN',
+}
+

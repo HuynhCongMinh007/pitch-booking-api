@@ -1,11 +1,4 @@
-import {
-  ArgumentsHost,
-  Catch,
-  ExceptionFilter,
-  HttpException,
-  HttpStatus,
-  Logger,
-} from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logger, } from '@nestjs/common';
 import type { Request, Response } from 'express';
 
 import { DomainException } from '../../domain/exceptions/domain.exception';
@@ -31,15 +24,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
       statusCode = exception.getStatus();
       code = HttpStatus[statusCode] ?? 'HTTP_ERROR';
       const res = exception.getResponse();
-      message =
-        typeof res === 'string'
-          ? res
-          : String((res as Record<string, unknown>).message ?? exception.message);
+      if (typeof res === 'string') {
+        message = res;
+      } else {
+        const rawMessage = (res as Record<string, unknown>).message ?? exception.message;
+        message = Array.isArray(rawMessage) ? rawMessage.join('; ') : String(rawMessage);
+      }
     } else {
       this.logger.error(
         `${request.method} ${request.originalUrl}`,
         exception instanceof Error ? exception.stack : String(exception),
       );
+    }
+
+    if (statusCode === HttpStatus.UNAUTHORIZED && !response.getHeader('WWW-Authenticate')) {
+      response.setHeader('WWW-Authenticate', 'Bearer');
     }
 
     response.status(statusCode).json({

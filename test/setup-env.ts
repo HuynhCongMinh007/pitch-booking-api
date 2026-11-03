@@ -1,5 +1,8 @@
+import 'reflect-metadata';
 import dotenv from 'dotenv';
 import path from 'path';
+
+import { getTestDatabaseUrl } from './support/test-database';
 
 // Load environment variables from project root .env
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
@@ -7,10 +10,8 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 // Force test environment
 process.env.NODE_ENV = 'test';
 
-// Direct Prisma and DB connections to the test database
-if (process.env.TEST_DATABASE_URL) {
-  process.env.DATABASE_URL = process.env.TEST_DATABASE_URL;
-}
+// Direct Prisma and DB connections to the test database (never touch dev DB)
+process.env.DATABASE_URL = getTestDatabaseUrl();
 
 // Ensure test secrets are present
 process.env.SECRET_KEY = process.env.SECRET_KEY || 'test-secret-key-pitchbooking-be-jwt';
