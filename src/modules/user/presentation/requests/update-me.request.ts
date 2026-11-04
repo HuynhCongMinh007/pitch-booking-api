@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { sanitizeText, stripEmptyString, } from '../../../../shared/presentation/utils/sanitizer.util';
+import { sanitizeText, stripEmptyString, } from '../../../../shared/utils/sanitizer.util';
 import type { UpdateMeInput } from '../../application/dtos/user.dto';
 import { Gender } from '../../domain/enums/gender.enum';
 import { USERNAME_REGEX } from '../../domain/value-objects/username.vo';

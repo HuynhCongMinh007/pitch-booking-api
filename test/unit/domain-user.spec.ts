@@ -10,7 +10,7 @@ import { Username } from '../../src/modules/user/domain/value-objects/username.v
 import {
   sanitizeText,
   stripEmptyString,
-} from '../../src/shared/presentation/utils/sanitizer.util';
+} from '../../src/shared/utils/sanitizer.util';
 
 describe('User Domain & Sanitizer Unit Tests', () => {
   describe('Sanitizer utilities', () => {
