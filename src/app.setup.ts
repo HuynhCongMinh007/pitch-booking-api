@@ -45,7 +45,10 @@ export function configureApp<T extends INestApplication>(app: T): T {
       .addBearerAuth()
       .build(),
   );
-  SwaggerModule.setup('docs', app, document, { jsonDocumentUrl: 'openapi.json' });
+  SwaggerModule.setup('docs', app, document, {
+    jsonDocumentUrl: 'openapi.json',
+    swaggerOptions: { defaultModelsExpandDepth: -1 },
+  });
 
   return app;
 }

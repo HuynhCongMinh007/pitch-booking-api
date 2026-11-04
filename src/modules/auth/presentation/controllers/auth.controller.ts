@@ -1,17 +1,19 @@
 import { timingSafeEqual } from 'node:crypto';
 
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 
 import { DomainException } from '../../../../shared/domain/exceptions/domain.exception';
 import { AppConfigService } from '../../../../shared/infrastructure/config/app-config.service';
-import { type AuthenticatedUser, CurrentUser, } from '../../../../shared/presentation/decorators/current-user.decorator';
+import {
+  type AuthenticatedUser,
+  CurrentUser,
+} from '../../../../shared/presentation/decorators/current-user.decorator';
 import { RateLimit } from '../../../../shared/presentation/decorators/rate-limit.decorator';
 import { JwtAuthGuard } from '../../../../shared/presentation/guards/jwt-auth.guard';
 import { RateLimitGuard } from '../../../../shared/presentation/guards/rate-limit.guard';
 import { ZodValidationPipe } from '../../../../shared/presentation/pipes/zod-validation.pipe';
-import { OAUTH_GOOGLE_COOKIE_PATH, buildCookieOptions, clearAuthCookies, setAuthCookies, } from '../utils/auth-cookie.util';
 import { GetGoogleLoginUrlUseCase } from '../../application/use-cases/get-google-login-url.use-case';
 import { GoogleExchangeUseCase } from '../../application/use-cases/google-exchange.use-case';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';
@@ -21,11 +23,30 @@ import { RefreshTokenUseCase } from '../../application/use-cases/refresh-token.u
 import { RegisterUseCase } from '../../application/use-cases/register.use-case';
 import { ResetPasswordUseCase } from '../../application/use-cases/reset-password.use-case';
 import { SendOtpUseCase } from '../../application/use-cases/send-otp.use-case';
-import { GoogleOAuthException, InvalidRefreshTokenException, } from '../../domain/exceptions/auth.exception';
 import {
-  type GoogleExchangeRequestDto, type LoginRequestDto, type RefreshTokenRequestDto, type RegisterRequestDto, type ResetPasswordRequestDto, type SendOtpRequestDto,
-  googleExchangeRequestSchema, loginRequestSchema, refreshTokenRequestSchema, registerRequestSchema, resetPasswordRequestSchema, sendOtpRequestSchema,
+  GoogleOAuthException,
+  InvalidRefreshTokenException,
+} from '../../domain/exceptions/auth.exception';
+import {
+  type GoogleExchangeRequestDto,
+  type LoginRequestDto,
+  type RefreshTokenRequestDto,
+  type RegisterRequestDto,
+  type ResetPasswordRequestDto,
+  type SendOtpRequestDto,
+  googleExchangeRequestSchema,
+  loginRequestSchema,
+  refreshTokenRequestSchema,
+  registerRequestSchema,
+  resetPasswordRequestSchema,
+  sendOtpRequestSchema,
 } from '../requests/auth.request';
+import {
+  OAUTH_GOOGLE_COOKIE_PATH,
+  buildCookieOptions,
+  clearAuthCookies,
+  setAuthCookies,
+} from '../utils/auth-cookie.util';
 
 function timingSafeCompare(a: string, b: string): boolean {
   const bufA = Buffer.from(a, 'utf8');
@@ -51,12 +72,23 @@ export class AuthController {
     private readonly getGoogleLoginUrlUseCase: GetGoogleLoginUrlUseCase,
     private readonly googleExchangeUseCase: GoogleExchangeUseCase,
     private readonly resetPasswordUseCase: ResetPasswordUseCase,
-  ) { }
+  ) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
   @RateLimit('REGISTER')
   @ApiOperation({ summary: 'Register a new user account with email OTP verification' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        otp: { type: 'string' },
+        username: { type: 'string' },
+        password: { type: 'string' },
+      },
+    },
+  })
   async register(
     @Body(new ZodValidationPipe(registerRequestSchema)) body: RegisterRequestDto,
     @Res({ passthrough: true }) response: Response,
@@ -77,6 +109,16 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit('SEND_OTP')
   @ApiOperation({ summary: 'Send OTP code for registration or password reset' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        purpose: { type: 'string' },
+        resend: { type: 'boolean' },
+      },
+    },
+  })
   sendOtp(@Body(new ZodValidationPipe(sendOtpRequestSchema)) body: SendOtpRequestDto) {
     return this.sendOtpUseCase.execute(body);
   }
@@ -84,8 +126,17 @@ export class AuthController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @RateLimit('LOGIN')
-  @ApiConsumes('application/x-www-form-urlencoded', 'application/json')
+  @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   @ApiOperation({ summary: 'Login with email or username and password' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        username: { type: 'string' },
+        password: { type: 'string' },
+      },
+    },
+  })
   async login(
     @Body(new ZodValidationPipe(loginRequestSchema)) body: LoginRequestDto,
     @Res({ passthrough: true }) response: Response,
@@ -99,6 +150,15 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit('REFRESH')
   @ApiOperation({ summary: 'Rotate refresh token and issue a new token pair' })
+  @ApiBody({
+    required: false,
+    schema: {
+      type: 'object',
+      properties: {
+        refresh_token: { type: 'string' },
+      },
+    },
+  })
   async refresh(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -122,6 +182,15 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout current session and revoke refresh token' })
+  @ApiBody({
+    required: false,
+    schema: {
+      type: 'object',
+      properties: {
+        refresh_token: { type: 'string' },
+      },
+    },
+  })
   async logout(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -176,6 +245,15 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit('LOGIN')
   @ApiOperation({ summary: 'Exchange Google OAuth2 authorization code for JWT tokens' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        code: { type: 'string' },
+        state: { type: 'string' },
+      },
+    },
+  })
   async googleExchange(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -203,6 +281,16 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit('VERIFY_OTP')
   @ApiOperation({ summary: 'Reset user password using OTP code' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string' },
+        otp: { type: 'string' },
+        new_password: { type: 'string' },
+      },
+    },
+  })
   resetPassword(
     @Body(new ZodValidationPipe(resetPasswordRequestSchema)) body: ResetPasswordRequestDto,
   ) {
@@ -213,4 +301,3 @@ export class AuthController {
     });
   }
 }
-

@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, UseGuards, } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
 import { type AuthenticatedUser, CurrentUser, } from '../../../../shared/presentation/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../../shared/presentation/guards/jwt-auth.guard';
@@ -18,7 +18,7 @@ export class UserController {
     private readonly getMeUseCase: GetMeUseCase,
     private readonly updateMeUseCase: UpdateMeUseCase,
     private readonly getUserByIdUseCase: GetUserByIdUseCase,
-  ) { }
+  ) {}
 
   @Get('me')
   @ApiOperation({ summary: 'Get current authenticated user profile' })
@@ -28,6 +28,21 @@ export class UserController {
 
   @Patch('me')
   @ApiOperation({ summary: 'Update current authenticated user profile' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        username: { type: 'string' },
+        full_name: { type: 'string' },
+        phone_number: { type: 'string' },
+        address: { type: 'string' },
+        avatar_url: { type: 'string' },
+        date_of_birth: { type: 'string' },
+        gender: { type: 'string' },
+        bio: { type: 'string' },
+      },
+    },
+  })
   updateMe(
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body(new ZodValidationPipe(updateMeRequestSchema)) changes: UpdateMeChangesDto,
@@ -50,4 +65,3 @@ export class UserController {
     return this.getUserByIdUseCase.execute({ userId });
   }
 }
-
