@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import nodemailer from 'nodemailer';
 
-import { AppConfigService } from '../../../../shared/infrastructure/config/app-config.service';
+import { AppConfigService } from '../../../../shared/infrastructure/services/app-config.service';
 import { escapeHtml } from '../../../../shared/presentation/utils/sanitizer.util';
 import type {
   IEmailService,

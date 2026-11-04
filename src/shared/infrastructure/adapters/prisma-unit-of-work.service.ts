@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 
 import type { IUnitOfWork } from '../../application/ports/unit-of-work.interface';
-import { PrismaService } from './prisma.service';
+import { PrismaService } from '../services/prisma.service';
 
 @Injectable()
 export class PrismaUnitOfWork implements IUnitOfWork {

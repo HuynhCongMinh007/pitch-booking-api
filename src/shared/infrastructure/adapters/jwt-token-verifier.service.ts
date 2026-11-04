@@ -6,7 +6,7 @@ import type {
   TokenPayload,
 } from '../../application/ports/token-verifier.interface';
 import { DomainException } from '../../domain/exceptions/domain.exception';
-import { AppConfigService } from '../config/app-config.service';
+import { AppConfigService } from '../services/app-config.service';
 
 @Injectable()
 export class JwtTokenVerifierService implements ITokenVerifier {

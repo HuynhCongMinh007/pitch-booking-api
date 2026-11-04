@@ -1,7 +1,7 @@
 import { Controller, Get, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { PrismaService } from '../../infrastructure/persistence/prisma.service';
+import { PrismaService } from '../../infrastructure/services/prisma.service';
 
 @ApiTags('health')
 @Controller('health')

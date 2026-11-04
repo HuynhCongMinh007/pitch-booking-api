@@ -1,7 +1,7 @@
 import type { EmailOtp as PrismaEmailOtp, OtpPurpose as PrismaOtpPurpose, Prisma, } from '@prisma/client';
 
-import { EmailOtpEntity } from '../../../domain/entities/email-otp.entity';
-import type { OtpPurpose } from '../../../domain/enums/otp-purpose.enum';
+import { EmailOtpEntity } from '../../domain/entities/email-otp.entity';
+import type { OtpPurpose } from '../../domain/enums/otp-purpose.enum';
 
 export class EmailOtpMapper {
   static toDomain(raw: PrismaEmailOtp): EmailOtpEntity {

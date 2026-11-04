@@ -16,7 +16,7 @@ import {
   OTP_CRYPTO_SERVICE,
 } from '../../src/modules/auth/application/ports/otp-crypto-service.interface';
 import { AuthModule } from '../../src/modules/auth/auth.module';
-import { RateLimitService } from '../../src/shared/infrastructure/security/rate-limit.service';
+import { RateLimitService } from '../../src/shared/infrastructure/services/rate-limit.service';
 
 export const FIXED_TEST_OTP = '246810';
 

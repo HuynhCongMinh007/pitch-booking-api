@@ -5,7 +5,7 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nes
 import type { Request, Response } from 'express';
 
 import { DomainException } from '../../../../shared/domain/exceptions/domain.exception';
-import { AppConfigService } from '../../../../shared/infrastructure/config/app-config.service';
+import { AppConfigService } from '../../../../shared/infrastructure/services/app-config.service';
 import {
   type AuthenticatedUser,
   CurrentUser,

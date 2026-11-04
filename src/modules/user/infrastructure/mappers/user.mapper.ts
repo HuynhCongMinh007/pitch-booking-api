@@ -1,8 +1,8 @@
 import type { Prisma, User as PrismaUser } from '@prisma/client';
 
-import { UserEntity } from '../../../domain/entities/user.entity';
-import type { Gender } from '../../../domain/enums/gender.enum';
-import type { UserRole } from '../../../domain/enums/user-role.enum';
+import { UserEntity } from '../../domain/entities/user.entity';
+import type { Gender } from '../../domain/enums/gender.enum';
+import type { UserRole } from '../../domain/enums/user-role.enum';
 
 export class UserMapper {
   static toDomain(raw: PrismaUser): UserEntity {

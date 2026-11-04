@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { AppConfigService } from '../../../../shared/infrastructure/config/app-config.service';
+import { AppConfigService } from '../../../../shared/infrastructure/services/app-config.service';
 import type {
   GoogleUserProfile,
   IGoogleOAuthClient,

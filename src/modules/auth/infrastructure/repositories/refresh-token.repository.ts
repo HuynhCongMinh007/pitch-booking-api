@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { DuplicateEntityException } from '../../../../shared/domain/exceptions/duplicate-entity.exception';
-import { isUniqueConstraintError } from '../../../../shared/infrastructure/persistence/prisma-error.util';
-import { PrismaUnitOfWork } from '../../../../shared/infrastructure/persistence/prisma-unit-of-work.service';
+import { isUniqueConstraintError } from '../../../../shared/infrastructure/utils/prisma-error.util';
+import { PrismaUnitOfWork } from '../../../../shared/infrastructure/adapters/prisma-unit-of-work.service';
 import type { RefreshTokenEntity } from '../../domain/entities/refresh-token.entity';
 import type { IRefreshTokenRepository } from '../../domain/repositories/refresh-token.repository.interface';
-import { RefreshTokenMapper } from './mappers/refresh-token.mapper';
+import { RefreshTokenMapper } from '../mappers/refresh-token.mapper';
 
 @Injectable()
 export class PrismaRefreshTokenRepository implements IRefreshTokenRepository {

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { AppConfigService } from '../../shared/infrastructure/config/app-config.service';
+import { AppConfigService } from '../../shared/infrastructure/services/app-config.service';
 import { UserModule } from '../user/user.module';
 import { AUTH_SETTINGS } from './application/ports/auth-settings.interface';
 import { AUTH_TOKEN_SERVICE } from './application/ports/auth-token-service.interface';
@@ -21,13 +21,13 @@ import { ResetPasswordUseCase } from './application/use-cases/reset-password.use
 import { SendOtpUseCase } from './application/use-cases/send-otp.use-case';
 import { EMAIL_OTP_REPOSITORY } from './domain/repositories/email-otp.repository.interface';
 import { REFRESH_TOKEN_REPOSITORY } from './domain/repositories/refresh-token.repository.interface';
-import { Argon2PasswordHasher } from './infrastructure/external-services/argon2-password-hasher.service';
-import { GoogleOAuthClient } from './infrastructure/external-services/google-oauth.service';
-import { HmacOtpCryptoService } from './infrastructure/external-services/hmac-otp-crypto.service';
-import { JwtAuthTokenService } from './infrastructure/external-services/jwt-auth-token.service';
-import { NodemailerEmailService } from './infrastructure/external-services/nodemailer-email.service';
-import { PrismaEmailOtpRepository } from './infrastructure/persistence/email-otp.repository';
-import { PrismaRefreshTokenRepository } from './infrastructure/persistence/refresh-token.repository';
+import { Argon2PasswordHasher } from './infrastructure/adapters/argon2-password-hasher.service';
+import { GoogleOAuthClient } from './infrastructure/adapters/google-oauth.service';
+import { HmacOtpCryptoService } from './infrastructure/adapters/hmac-otp-crypto.service';
+import { JwtAuthTokenService } from './infrastructure/adapters/jwt-auth-token.service';
+import { NodemailerEmailService } from './infrastructure/adapters/nodemailer-email.service';
+import { PrismaEmailOtpRepository } from './infrastructure/repositories/email-otp.repository';
+import { PrismaRefreshTokenRepository } from './infrastructure/repositories/refresh-token.repository';
 import { AuthController } from './presentation/controllers/auth.controller';
 
 @Module({

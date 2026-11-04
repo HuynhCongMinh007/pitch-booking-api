@@ -11,7 +11,7 @@ import type { Request } from 'express';
 import {
   type RateLimitPreset,
   RateLimitService,
-} from '../../infrastructure/security/rate-limit.service';
+} from '../../infrastructure/services/rate-limit.service';
 import { RATE_LIMIT_METADATA_KEY } from '../decorators/rate-limit.decorator';
 
 @Injectable()

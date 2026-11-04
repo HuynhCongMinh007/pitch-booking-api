@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
 import { DuplicateEntityException } from '../../../../shared/domain/exceptions/duplicate-entity.exception';
-import { isUniqueConstraintError } from '../../../../shared/infrastructure/persistence/prisma-error.util';
-import { PrismaUnitOfWork } from '../../../../shared/infrastructure/persistence/prisma-unit-of-work.service';
+import { isUniqueConstraintError } from '../../../../shared/infrastructure/utils/prisma-error.util';
+import { PrismaUnitOfWork } from '../../../../shared/infrastructure/adapters/prisma-unit-of-work.service';
 import type { EmailOtpEntity } from '../../domain/entities/email-otp.entity';
 import type { OtpPurpose } from '../../domain/enums/otp-purpose.enum';
 import type { IEmailOtpRepository } from '../../domain/repositories/email-otp.repository.interface';
-import { EmailOtpMapper } from './mappers/email-otp.mapper';
+import { EmailOtpMapper } from '../mappers/email-otp.mapper';
 
 @Injectable()
 export class PrismaEmailOtpRepository implements IEmailOtpRepository {

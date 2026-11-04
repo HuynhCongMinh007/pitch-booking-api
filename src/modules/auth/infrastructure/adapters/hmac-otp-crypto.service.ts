@@ -2,7 +2,7 @@ import { createHmac, randomInt, timingSafeEqual } from 'node:crypto';
 
 import { Injectable } from '@nestjs/common';
 
-import { AppConfigService } from '../../../../shared/infrastructure/config/app-config.service';
+import { AppConfigService } from '../../../../shared/infrastructure/services/app-config.service';
 import type { IOtpCryptoService } from '../../application/ports/otp-crypto-service.interface';
 
 @Injectable()

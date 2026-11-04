@@ -1,6 +1,6 @@
 import { SetMetadata } from '@nestjs/common';
 
-import type { RateLimitPreset } from '../../infrastructure/security/rate-limit.service';
+import type { RateLimitPreset } from '../../infrastructure/services/rate-limit.service';
 
 export const RATE_LIMIT_METADATA_KEY = 'pitchbooking:rate_limit_preset';
 

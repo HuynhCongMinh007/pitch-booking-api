@@ -1,4 +1,4 @@
-import { buildOtpHtml } from '../../src/modules/auth/infrastructure/external-services/nodemailer-email.service';
+import { buildOtpHtml } from '../../src/modules/auth/infrastructure/adapters/nodemailer-email.service';
 import { UserEntity } from '../../src/modules/user/domain/entities/user.entity';
 import { Gender, parseGender } from '../../src/modules/user/domain/enums/gender.enum';
 import { UserRole } from '../../src/modules/user/domain/enums/user-role.enum';

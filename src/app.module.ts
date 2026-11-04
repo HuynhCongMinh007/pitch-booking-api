@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
-import { AppConfigModule } from './shared/infrastructure/config/app-config.module';
-import { DatabaseModule } from './shared/infrastructure/persistence/database.module';
-import { SecurityModule } from './shared/infrastructure/security/security.module';
+import { AppConfigModule } from './shared/infrastructure/modules/app-config.module';
+import { DatabaseModule } from './shared/infrastructure/modules/database.module';
+import { SecurityModule } from './shared/infrastructure/modules/security.module';
 import { HealthController } from './shared/presentation/controllers/health.controller';
 
 @Module({

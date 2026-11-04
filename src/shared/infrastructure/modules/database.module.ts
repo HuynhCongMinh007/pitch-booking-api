@@ -1,8 +1,8 @@
 import { Global, Module } from '@nestjs/common';
 
 import { UNIT_OF_WORK } from '../../application/ports/unit-of-work.interface';
-import { PrismaUnitOfWork } from './prisma-unit-of-work.service';
-import { PrismaService } from './prisma.service';
+import { PrismaUnitOfWork } from '../adapters/prisma-unit-of-work.service';
+import { PrismaService } from '../services/prisma.service';
 
 @Global()
 @Module({

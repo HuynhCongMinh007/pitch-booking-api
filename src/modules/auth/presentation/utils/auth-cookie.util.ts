@@ -1,6 +1,6 @@
 import type { CookieOptions, Response } from 'express';
 
-import type { AppConfigService } from '../../../../shared/infrastructure/config/app-config.service';
+import type { AppConfigService } from '../../../../shared/infrastructure/services/app-config.service';
 
 export const OAUTH_GOOGLE_COOKIE_PATH = '/api/v1/auth/google';
 

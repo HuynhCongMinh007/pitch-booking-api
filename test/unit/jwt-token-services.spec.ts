@@ -1,7 +1,7 @@
-import { JwtAuthTokenService } from '../../src/modules/auth/infrastructure/external-services/jwt-auth-token.service';
+import { JwtAuthTokenService } from '../../src/modules/auth/infrastructure/adapters/jwt-auth-token.service';
 import { DomainException } from '../../src/shared/domain/exceptions/domain.exception';
-import { AppConfigService } from '../../src/shared/infrastructure/config/app-config.service';
-import { JwtTokenVerifierService } from '../../src/shared/infrastructure/security/jwt-token-verifier.service';
+import { AppConfigService } from '../../src/shared/infrastructure/services/app-config.service';
+import { JwtTokenVerifierService } from '../../src/shared/infrastructure/adapters/jwt-token-verifier.service';
 
 describe('JWT Issuer (Auth) & Verifier (Shared) Interoperability', () => {
   const config = new AppConfigService();

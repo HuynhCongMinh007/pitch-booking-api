@@ -8,7 +8,7 @@ import type {
   TokenType,
 } from '../../../../shared/application/ports/token-verifier.interface';
 import { DomainException } from '../../../../shared/domain/exceptions/domain.exception';
-import { AppConfigService } from '../../../../shared/infrastructure/config/app-config.service';
+import { AppConfigService } from '../../../../shared/infrastructure/services/app-config.service';
 import type {
   GeneratedToken,
   IAuthTokenService,

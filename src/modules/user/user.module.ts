@@ -4,7 +4,7 @@ import { GetMeUseCase } from './application/use-cases/get-me.use-case';
 import { GetUserByIdUseCase } from './application/use-cases/get-user-by-id.use-case';
 import { UpdateMeUseCase } from './application/use-cases/update-me.use-case';
 import { USER_REPOSITORY } from './domain/repositories/user.repository.interface';
-import { PrismaUserRepository } from './infrastructure/persistence/user.repository';
+import { PrismaUserRepository } from './infrastructure/repositories/user.repository';
 import { UserController } from './presentation/controllers/user.controller';
 
 @Module({
