@@ -2,16 +2,26 @@ import { randomUUID } from 'node:crypto';
 
 import { Inject, Injectable } from '@nestjs/common';
 
-import { type IUnitOfWork, UNIT_OF_WORK, } from '../../../../shared/application/ports/unit-of-work.interface';
+import {
+  type IUnitOfWork,
+  UNIT_OF_WORK,
+} from '../../../../shared/application/ports/unit-of-work.interface';
 import type { IUseCase } from '../../../../shared/application/use-cases/use-case.interface';
-import { type IUserRepository, USER_REPOSITORY, } from '../../../user/domain/repositories/user.repository.interface';
+import {
+  type IUserRepository,
+  USER_REPOSITORY,
+} from '../../../user/domain/repositories/user.repository.interface';
 import { InvalidCredentialsException } from '../../domain/exceptions/auth.exception';
-import type { LoginInput, TokenResponseDto } from '../dtos/auth.dto';
 import { type IPasswordHasher, PASSWORD_HASHER } from '../ports/password-hasher.interface';
-import { TokenIssuerService } from '../services/token-issuer.service';
+import { type IssuedTokenPair, TokenIssuerService } from '../services/token-issuer.service';
+
+export interface LoginInput {
+  username: string;
+  password: string;
+}
 
 @Injectable()
-export class LoginUseCase implements IUseCase<LoginInput, TokenResponseDto> {
+export class LoginUseCase implements IUseCase<LoginInput, IssuedTokenPair> {
   private dummyPasswordHashPromise: Promise<string> | null = null;
 
   constructor(
@@ -22,9 +32,9 @@ export class LoginUseCase implements IUseCase<LoginInput, TokenResponseDto> {
     @Inject(UNIT_OF_WORK)
     private readonly unitOfWork: IUnitOfWork,
     private readonly tokenIssuerService: TokenIssuerService,
-  ) { }
+  ) {}
 
-  async execute(input: LoginInput): Promise<TokenResponseDto> {
+  async execute(input: LoginInput): Promise<IssuedTokenPair> {
     const user = await this.userRepository.findByEmailOrUsername(input.username);
     const passwordHash = user ? user.passwordHash : await this.getDummyPasswordHash();
 
@@ -56,4 +66,3 @@ export class LoginUseCase implements IUseCase<LoginInput, TokenResponseDto> {
     return this.dummyPasswordHashPromise;
   }
 }
-

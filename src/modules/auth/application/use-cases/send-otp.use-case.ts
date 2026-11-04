@@ -25,14 +25,27 @@ import {
   EMAIL_OTP_REPOSITORY,
   type IEmailOtpRepository,
 } from '../../domain/repositories/email-otp.repository.interface';
-import type { SendOtpInput, SendOtpResponseDto } from '../dtos/auth.dto';
 import { AUTH_SETTINGS, type IAuthSettings } from '../ports/auth-settings.interface';
 import { EMAIL_SERVICE, type IEmailService } from '../ports/email-service.interface';
 import { type IPasswordHasher, PASSWORD_HASHER } from '../ports/password-hasher.interface';
 import { OtpVerificationService } from '../services/otp-verification.service';
 
+export interface SendOtpInput {
+  email: string;
+  purpose: OtpPurpose;
+  resend: boolean;
+}
+
+export interface SendOtpResult {
+  message: string;
+  email: string;
+  isAlreadySent: boolean;
+  cooldownSeconds: number;
+  expiresInSeconds: number;
+}
+
 @Injectable()
-export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResponseDto> {
+export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResult> {
   private readonly logger = new Logger(SendOtpUseCase.name);
 
   constructor(
@@ -51,7 +64,7 @@ export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResponseDto
     private readonly otpVerificationService: OtpVerificationService,
   ) {}
 
-  async execute(input: SendOtpInput): Promise<SendOtpResponseDto> {
+  async execute(input: SendOtpInput): Promise<SendOtpResult> {
     const emailVo = Email.create(input.email);
     const now = new Date();
 
@@ -60,9 +73,9 @@ export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResponseDto
       return {
         message: OTP_SENT_GENERIC_MSG,
         email: emailVo.value,
-        is_already_sent: false,
-        cooldown_seconds: this.settings.otpResendCooldownSeconds,
-        expires_in_seconds: this.settings.otpExpireMinutes * 60,
+        isAlreadySent: false,
+        cooldownSeconds: this.settings.otpResendCooldownSeconds,
+        expiresInSeconds: this.settings.otpExpireMinutes * 60,
       };
     }
 
@@ -82,9 +95,9 @@ export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResponseDto
         message:
           'Verification code has already been sent and is still valid. Please check your inbox.',
         email: user.email,
-        is_already_sent: true,
-        cooldown_seconds: cooldownRemaining,
-        expires_in_seconds: activeOtp.remainingSeconds(now),
+        isAlreadySent: true,
+        cooldownSeconds: cooldownRemaining,
+        expiresInSeconds: activeOtp.remainingSeconds(now),
       };
     }
 
@@ -113,9 +126,9 @@ export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResponseDto
         ? 'A new verification code has been sent to your email.'
         : 'Verification code has been sent to your email.',
       email: user.email,
-      is_already_sent: false,
-      cooldown_seconds: this.settings.otpResendCooldownSeconds,
-      expires_in_seconds: this.settings.otpExpireMinutes * 60,
+      isAlreadySent: false,
+      cooldownSeconds: this.settings.otpResendCooldownSeconds,
+      expiresInSeconds: this.settings.otpExpireMinutes * 60,
     };
   }
 
@@ -185,4 +198,3 @@ export class SendOtpUseCase implements IUseCase<SendOtpInput, SendOtpResponseDto
     }
   }
 }
-

@@ -6,11 +6,14 @@ import {
   type IRefreshTokenRepository,
   REFRESH_TOKEN_REPOSITORY,
 } from '../../domain/repositories/refresh-token.repository.interface';
-import type { LogoutInput } from '../dtos/auth.dto';
 import {
   AUTH_TOKEN_SERVICE,
   type IAuthTokenService,
 } from '../ports/auth-token-service.interface';
+
+export interface LogoutInput {
+  refreshToken: string;
+}
 
 @Injectable()
 export class LogoutUseCase implements IUseCase<LogoutInput, void> {

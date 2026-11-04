@@ -1,6 +1,16 @@
 import { timingSafeEqual } from 'node:crypto';
 
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 
@@ -27,20 +37,30 @@ import {
   GoogleOAuthException,
   InvalidRefreshTokenException,
 } from '../../domain/exceptions/auth.exception';
+import { AuthResponseDto, type MessageResponseDto } from '../dtos/auth-response.dto';
 import {
   type GoogleExchangeRequestDto,
-  type LoginRequestDto,
-  type RefreshTokenRequestDto,
-  type RegisterRequestDto,
-  type ResetPasswordRequestDto,
-  type SendOtpRequestDto,
   googleExchangeRequestSchema,
-  loginRequestSchema,
+} from '../dtos/google-exchange.dto';
+import { type LoginRequestDto, loginRequestSchema } from '../dtos/login.dto';
+import {
+  type RefreshTokenRequestDto,
   refreshTokenRequestSchema,
+} from '../dtos/refresh-token.dto';
+import {
+  type RegisterRequestDto,
   registerRequestSchema,
+  toRegisterResponseDto,
+} from '../dtos/register.dto';
+import {
+  type ResetPasswordRequestDto,
   resetPasswordRequestSchema,
+} from '../dtos/reset-password.dto';
+import {
+  type SendOtpRequestDto,
   sendOtpRequestSchema,
-} from '../requests/auth.request';
+  toSendOtpResponseDto,
+} from '../dtos/send-otp.dto';
 import {
   OAUTH_GOOGLE_COOKIE_PATH,
   buildCookieOptions,
@@ -98,11 +118,11 @@ export class AuthController {
       setAuthCookies(
         response,
         this.config,
-        result.tokens.access_token,
-        result.tokens.refresh_token,
+        result.tokens.accessToken,
+        result.tokens.refreshToken,
       );
     }
-    return result;
+    return toRegisterResponseDto(result);
   }
 
   @Post('send-otp')
@@ -119,8 +139,9 @@ export class AuthController {
       },
     },
   })
-  sendOtp(@Body(new ZodValidationPipe(sendOtpRequestSchema)) body: SendOtpRequestDto) {
-    return this.sendOtpUseCase.execute(body);
+  async sendOtp(@Body(new ZodValidationPipe(sendOtpRequestSchema)) body: SendOtpRequestDto) {
+    const result = await this.sendOtpUseCase.execute(body);
+    return toSendOtpResponseDto(result);
   }
 
   @Post('login')
@@ -142,8 +163,8 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const tokens = await this.loginUseCase.execute(body);
-    setAuthCookies(response, this.config, tokens.access_token, tokens.refresh_token);
-    return tokens;
+    setAuthCookies(response, this.config, tokens.accessToken, tokens.refreshToken);
+    return AuthResponseDto.toTokenResponse(tokens);
   }
 
   @Post('refresh')
@@ -175,8 +196,8 @@ export class AuthController {
     }
 
     const tokens = await this.refreshTokenUseCase.execute({ refreshToken: rawRefreshToken });
-    setAuthCookies(response, this.config, tokens.access_token, tokens.refresh_token);
-    return tokens;
+    setAuthCookies(response, this.config, tokens.accessToken, tokens.refreshToken);
+    return AuthResponseDto.toTokenResponse(tokens);
   }
 
   @Post('logout')
@@ -195,7 +216,7 @@ export class AuthController {
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
     @Body(new ZodValidationPipe(refreshTokenRequestSchema)) body: RefreshTokenRequestDto,
-  ) {
+  ): Promise<MessageResponseDto> {
     const rawRefreshToken =
       body.refresh_token ||
       (typeof request.cookies?.refresh_token === 'string'
@@ -224,7 +245,7 @@ export class AuthController {
   async logoutAll(
     @CurrentUser() currentUser: AuthenticatedUser,
     @Res({ passthrough: true }) response: Response,
-  ) {
+  ): Promise<MessageResponseDto> {
     await this.logoutAllUseCase.execute({ userId: currentUser.userId });
     clearAuthCookies(response, this.config);
     return { message: 'Logged out from all sessions successfully' };
@@ -273,8 +294,8 @@ export class AuthController {
       this.config.oauthStateCookieName,
       buildCookieOptions(this.config, OAUTH_GOOGLE_COOKIE_PATH),
     );
-    setAuthCookies(response, this.config, tokens.access_token, tokens.refresh_token);
-    return tokens;
+    setAuthCookies(response, this.config, tokens.accessToken, tokens.refreshToken);
+    return AuthResponseDto.toTokenResponse(tokens);
   }
 
   @Post('reset-password')
@@ -293,11 +314,7 @@ export class AuthController {
   })
   resetPassword(
     @Body(new ZodValidationPipe(resetPasswordRequestSchema)) body: ResetPasswordRequestDto,
-  ) {
-    return this.resetPasswordUseCase.execute({
-      email: body.email,
-      otp: body.otp,
-      newPassword: body.new_password,
-    });
+  ): Promise<MessageResponseDto> {
+    return this.resetPasswordUseCase.execute(body);
   }
 }

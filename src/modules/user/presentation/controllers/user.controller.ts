@@ -1,13 +1,26 @@
-import { Body, Controller, Get, HttpStatus, Param, ParseIntPipe, Patch, UseGuards, } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Patch,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 
-import { type AuthenticatedUser, CurrentUser, } from '../../../../shared/presentation/decorators/current-user.decorator';
+import {
+  type AuthenticatedUser,
+  CurrentUser,
+} from '../../../../shared/presentation/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../../../shared/presentation/guards/jwt-auth.guard';
 import { ZodValidationPipe } from '../../../../shared/presentation/pipes/zod-validation.pipe';
 import { GetMeUseCase } from '../../application/use-cases/get-me.use-case';
 import { GetUserByIdUseCase } from '../../application/use-cases/get-user-by-id.use-case';
 import { UpdateMeUseCase } from '../../application/use-cases/update-me.use-case';
-import { type UpdateMeChangesDto, updateMeRequestSchema } from '../requests/update-me.request';
+import { type UpdateMeChangesDto, updateMeRequestSchema } from '../dtos/update-me.dto';
+import { UserResponseDto } from '../dtos/user-response.dto';
 
 @ApiTags('users')
 @ApiBearerAuth()
@@ -22,8 +35,9 @@ export class UserController {
 
   @Get('me')
   @ApiOperation({ summary: 'Get current authenticated user profile' })
-  getMe(@CurrentUser() currentUser: AuthenticatedUser) {
-    return this.getMeUseCase.execute({ userId: currentUser.userId });
+  async getMe(@CurrentUser() currentUser: AuthenticatedUser) {
+    const user = await this.getMeUseCase.execute({ userId: currentUser.userId });
+    return UserResponseDto.toMe(user);
   }
 
   @Patch('me')
@@ -43,25 +57,27 @@ export class UserController {
       },
     },
   })
-  updateMe(
+  async updateMe(
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body(new ZodValidationPipe(updateMeRequestSchema)) changes: UpdateMeChangesDto,
   ) {
-    return this.updateMeUseCase.execute({
+    const user = await this.updateMeUseCase.execute({
       userId: currentUser.userId,
       changes,
     });
+    return UserResponseDto.toMe(user);
   }
 
   @Get(':userId')
   @ApiOperation({ summary: 'Get public user profile by ID' })
-  getUserById(
+  async getUserById(
     @Param(
       'userId',
       new ParseIntPipe({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
     )
     userId: number,
   ) {
-    return this.getUserByIdUseCase.execute({ userId });
+    const user = await this.getUserByIdUseCase.execute({ userId });
+    return UserResponseDto.toPublic(user);
   }
 }

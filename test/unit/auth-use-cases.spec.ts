@@ -97,7 +97,7 @@ describe('Auth UseCases Unit Tests (Isolated from DB)', () => {
     });
 
     expect(result.email).toBe('unknown@example.com');
-    expect(result.is_already_sent).toBe(false);
+    expect(result.isAlreadySent).toBe(false);
     expect(emailService.sendPasswordResetOtpEmail).not.toHaveBeenCalled();
   });
 });

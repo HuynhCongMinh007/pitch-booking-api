@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { sanitizeText, stripEmptyString, } from '../../../../shared/utils/sanitizer.util';
-import type { UpdateMeInput } from '../../application/dtos/user.dto';
+import type { UpdateMeInput } from '../../application/use-cases/update-me.use-case';
 import { Gender } from '../../domain/enums/gender.enum';
 import { USERNAME_REGEX } from '../../domain/value-objects/username.vo';
 

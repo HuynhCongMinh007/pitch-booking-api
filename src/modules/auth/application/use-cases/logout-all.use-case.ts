@@ -5,7 +5,10 @@ import {
   type IRefreshTokenRepository,
   REFRESH_TOKEN_REPOSITORY,
 } from '../../domain/repositories/refresh-token.repository.interface';
-import type { LogoutAllInput } from '../dtos/auth.dto';
+
+export interface LogoutAllInput {
+  userId: number;
+}
 
 @Injectable()
 export class LogoutAllUseCase implements IUseCase<LogoutAllInput, void> {
@@ -18,4 +21,3 @@ export class LogoutAllUseCase implements IUseCase<LogoutAllInput, void> {
     await this.refreshTokenRepository.revokeAllByUserId(input.userId);
   }
 }
-

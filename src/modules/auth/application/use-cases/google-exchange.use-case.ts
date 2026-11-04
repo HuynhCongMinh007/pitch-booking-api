@@ -2,23 +2,41 @@ import { randomUUID } from 'node:crypto';
 
 import { Inject, Injectable } from '@nestjs/common';
 
-import { type IUnitOfWork, UNIT_OF_WORK, } from '../../../../shared/application/ports/unit-of-work.interface';
+import {
+  type IUnitOfWork,
+  UNIT_OF_WORK,
+} from '../../../../shared/application/ports/unit-of-work.interface';
 import type { IUseCase } from '../../../../shared/application/use-cases/use-case.interface';
 import { DuplicateEntityException } from '../../../../shared/domain/exceptions/duplicate-entity.exception';
 import { UserEntity } from '../../../user/domain/entities/user.entity';
-import { type IUserRepository, USER_REPOSITORY, } from '../../../user/domain/repositories/user.repository.interface';
+import {
+  type IUserRepository,
+  USER_REPOSITORY,
+} from '../../../user/domain/repositories/user.repository.interface';
 import { Email } from '../../../user/domain/value-objects/email.vo';
 import { OtpPurpose } from '../../domain/enums/otp-purpose.enum';
-import { ConcurrentAuthOperationException, GoogleOAuthException, } from '../../domain/exceptions/auth.exception';
-import { EMAIL_OTP_REPOSITORY, type IEmailOtpRepository, } from '../../domain/repositories/email-otp.repository.interface';
-import { type IRefreshTokenRepository, REFRESH_TOKEN_REPOSITORY, } from '../../domain/repositories/refresh-token.repository.interface';
-import type { GoogleExchangeInput, TokenResponseDto } from '../dtos/auth.dto';
+import {
+  ConcurrentAuthOperationException,
+  GoogleOAuthException,
+} from '../../domain/exceptions/auth.exception';
+import {
+  EMAIL_OTP_REPOSITORY,
+  type IEmailOtpRepository,
+} from '../../domain/repositories/email-otp.repository.interface';
+import {
+  type IRefreshTokenRepository,
+  REFRESH_TOKEN_REPOSITORY,
+} from '../../domain/repositories/refresh-token.repository.interface';
 import { GOOGLE_OAUTH_CLIENT, type IGoogleOAuthClient } from '../ports/google-oauth.interface';
 import { type IPasswordHasher, PASSWORD_HASHER } from '../ports/password-hasher.interface';
-import { TokenIssuerService } from '../services/token-issuer.service';
+import { type IssuedTokenPair, TokenIssuerService } from '../services/token-issuer.service';
+
+export interface GoogleExchangeInput {
+  code: string;
+}
 
 @Injectable()
-export class GoogleExchangeUseCase implements IUseCase<GoogleExchangeInput, TokenResponseDto> {
+export class GoogleExchangeUseCase implements IUseCase<GoogleExchangeInput, IssuedTokenPair> {
   constructor(
     @Inject(GOOGLE_OAUTH_CLIENT)
     private readonly googleOAuthClient: IGoogleOAuthClient,
@@ -33,9 +51,9 @@ export class GoogleExchangeUseCase implements IUseCase<GoogleExchangeInput, Toke
     @Inject(UNIT_OF_WORK)
     private readonly unitOfWork: IUnitOfWork,
     private readonly tokenIssuerService: TokenIssuerService,
-  ) { }
+  ) {}
 
-  async execute(input: GoogleExchangeInput): Promise<TokenResponseDto> {
+  async execute(input: GoogleExchangeInput): Promise<IssuedTokenPair> {
     const profile = await this.googleOAuthClient.exchangeCodeForProfile(input.code);
 
     const rawEmail = profile.email.trim().toLowerCase();
@@ -90,4 +108,3 @@ export class GoogleExchangeUseCase implements IUseCase<GoogleExchangeInput, Toke
     }
   }
 }
-

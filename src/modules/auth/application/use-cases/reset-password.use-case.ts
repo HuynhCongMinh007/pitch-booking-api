@@ -16,12 +16,21 @@ import {
   type IRefreshTokenRepository,
   REFRESH_TOKEN_REPOSITORY,
 } from '../../domain/repositories/refresh-token.repository.interface';
-import type { MessageResponseDto, ResetPasswordInput } from '../dtos/auth.dto';
 import { type IPasswordHasher, PASSWORD_HASHER } from '../ports/password-hasher.interface';
 import { OtpVerificationService } from '../services/otp-verification.service';
 
+export interface ResetPasswordInput {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordResult {
+  message: string;
+}
+
 @Injectable()
-export class ResetPasswordUseCase implements IUseCase<ResetPasswordInput, MessageResponseDto> {
+export class ResetPasswordUseCase implements IUseCase<ResetPasswordInput, ResetPasswordResult> {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
@@ -34,7 +43,7 @@ export class ResetPasswordUseCase implements IUseCase<ResetPasswordInput, Messag
     private readonly otpVerificationService: OtpVerificationService,
   ) {}
 
-  async execute(input: ResetPasswordInput): Promise<MessageResponseDto> {
+  async execute(input: ResetPasswordInput): Promise<ResetPasswordResult> {
     const email = Email.create(input.email);
     const user = await this.userRepository.findByEmail(email.value);
 
@@ -62,4 +71,3 @@ export class ResetPasswordUseCase implements IUseCase<ResetPasswordInput, Messag
     };
   }
 }
-

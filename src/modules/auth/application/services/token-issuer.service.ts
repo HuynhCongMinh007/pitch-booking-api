@@ -5,11 +5,17 @@ import {
   type IRefreshTokenRepository,
   REFRESH_TOKEN_REPOSITORY,
 } from '../../domain/repositories/refresh-token.repository.interface';
-import type { TokenResponseDto } from '../dtos/auth.dto';
 import {
   AUTH_TOKEN_SERVICE,
   type IAuthTokenService,
 } from '../ports/auth-token-service.interface';
+
+export interface IssuedTokenPair {
+  accessToken: string;
+  refreshToken: string;
+  accessTokenExpiresAt: Date;
+  refreshTokenExpiresAt: Date;
+}
 
 @Injectable()
 export class TokenIssuerService {
@@ -20,7 +26,7 @@ export class TokenIssuerService {
     private readonly refreshTokenRepository: IRefreshTokenRepository,
   ) {}
 
-  async issueTokens(userId: number): Promise<TokenResponseDto> {
+  async issueTokens(userId: number): Promise<IssuedTokenPair> {
     const access = this.tokenService.createAccessToken(userId);
     const refresh = this.tokenService.createRefreshToken(userId);
 
@@ -32,11 +38,10 @@ export class TokenIssuerService {
     await this.refreshTokenRepository.create(refreshEntity);
 
     return {
-      access_token: access.token,
-      refresh_token: refresh.token,
-      access_token_expires_at: access.expiresAt,
-      refresh_token_expires_at: refresh.expiresAt,
-      token_type: 'bearer',
+      accessToken: access.token,
+      refreshToken: refresh.token,
+      accessTokenExpiresAt: access.expiresAt,
+      refreshTokenExpiresAt: refresh.expiresAt,
     };
   }
 }

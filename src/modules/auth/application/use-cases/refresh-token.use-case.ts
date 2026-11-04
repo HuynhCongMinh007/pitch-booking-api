@@ -14,15 +14,18 @@ import {
   type IRefreshTokenRepository,
   REFRESH_TOKEN_REPOSITORY,
 } from '../../domain/repositories/refresh-token.repository.interface';
-import type { RefreshTokenInput, TokenResponseDto } from '../dtos/auth.dto';
 import {
   AUTH_TOKEN_SERVICE,
   type IAuthTokenService,
 } from '../ports/auth-token-service.interface';
-import { TokenIssuerService } from '../services/token-issuer.service';
+import { type IssuedTokenPair, TokenIssuerService } from '../services/token-issuer.service';
+
+export interface RefreshTokenInput {
+  refreshToken: string;
+}
 
 @Injectable()
-export class RefreshTokenUseCase implements IUseCase<RefreshTokenInput, TokenResponseDto> {
+export class RefreshTokenUseCase implements IUseCase<RefreshTokenInput, IssuedTokenPair> {
   constructor(
     @Inject(AUTH_TOKEN_SERVICE)
     private readonly tokenService: IAuthTokenService,
@@ -35,7 +38,7 @@ export class RefreshTokenUseCase implements IUseCase<RefreshTokenInput, TokenRes
     private readonly tokenIssuerService: TokenIssuerService,
   ) {}
 
-  async execute(input: RefreshTokenInput): Promise<TokenResponseDto> {
+  async execute(input: RefreshTokenInput): Promise<IssuedTokenPair> {
     this.tokenService.verifyRefreshToken(input.refreshToken);
 
     const tokenHash = this.tokenService.hashToken(input.refreshToken);

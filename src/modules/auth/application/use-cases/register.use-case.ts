@@ -20,13 +20,24 @@ import {
   InvalidOtpException,
   UsernameAlreadyUsedException,
 } from '../../domain/exceptions/auth.exception';
-import type { RegisterInput, RegisterResponseDto } from '../dtos/auth.dto';
 import { type IPasswordHasher, PASSWORD_HASHER } from '../ports/password-hasher.interface';
 import { OtpVerificationService } from '../services/otp-verification.service';
-import { TokenIssuerService } from '../services/token-issuer.service';
+import { type IssuedTokenPair, TokenIssuerService } from '../services/token-issuer.service';
+
+export interface RegisterInput {
+  email: string;
+  otp: string;
+  username: string;
+  password: string;
+}
+
+export interface RegisterResult {
+  message: string;
+  tokens: IssuedTokenPair | null;
+}
 
 @Injectable()
-export class RegisterUseCase implements IUseCase<RegisterInput, RegisterResponseDto> {
+export class RegisterUseCase implements IUseCase<RegisterInput, RegisterResult> {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: IUserRepository,
@@ -38,7 +49,7 @@ export class RegisterUseCase implements IUseCase<RegisterInput, RegisterResponse
     private readonly tokenIssuerService: TokenIssuerService,
   ) {}
 
-  async execute(input: RegisterInput): Promise<RegisterResponseDto> {
+  async execute(input: RegisterInput): Promise<RegisterResult> {
     const email = Email.create(input.email);
     const username = Username.create(input.username);
 
@@ -89,4 +100,3 @@ export class RegisterUseCase implements IUseCase<RegisterInput, RegisterResponse
     }
   }
 }
-
