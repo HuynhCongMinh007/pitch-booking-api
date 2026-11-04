@@ -4,16 +4,18 @@ import { Injectable } from '@nestjs/common';
 import jwt from 'jsonwebtoken';
 
 import type {
-  GeneratedToken,
-  ITokenService,
   TokenPayload,
   TokenType,
-} from '../../application/ports/token-service.interface';
-import { DomainException } from '../../domain/exceptions/domain.exception';
-import { AppConfigService } from '../config/app-config.service';
+} from '../../../../shared/application/ports/token-verifier.interface';
+import { DomainException } from '../../../../shared/domain/exceptions/domain.exception';
+import { AppConfigService } from '../../../../shared/infrastructure/config/app-config.service';
+import type {
+  GeneratedToken,
+  IAuthTokenService,
+} from '../../application/ports/auth-token-service.interface';
 
 @Injectable()
-export class JwtTokenService implements ITokenService {
+export class JwtAuthTokenService implements IAuthTokenService {
   constructor(private readonly config: AppConfigService) {}
 
   createAccessToken(userId: number): GeneratedToken {
@@ -24,12 +26,29 @@ export class JwtTokenService implements ITokenService {
     return this.createToken(userId, 'refresh');
   }
 
-  verifyAccessToken(token: string): TokenPayload {
-    return this.decodeToken(token, 'access');
-  }
-
   verifyRefreshToken(token: string): TokenPayload {
-    return this.decodeToken(token, 'refresh');
+    let decoded: string | jwt.JwtPayload;
+    try {
+      decoded = jwt.verify(token, this.config.secretKey, {
+        algorithms: [this.config.jwtAlgorithm],
+      });
+    } catch {
+      throw new DomainException('Invalid or expired token', 'UNAUTHORIZED', 401);
+    }
+
+    if (typeof decoded !== 'object' || decoded === null) {
+      throw new DomainException('Invalid or expired token', 'UNAUTHORIZED', 401);
+    }
+
+    if (decoded.type !== 'refresh') {
+      throw new DomainException('Expected refresh token', 'UNAUTHORIZED', 401);
+    }
+
+    if (typeof decoded.sub !== 'string' || !decoded.sub) {
+      throw new DomainException('Invalid or expired token', 'UNAUTHORIZED', 401);
+    }
+
+    return decoded as unknown as TokenPayload;
   }
 
   hashToken(rawToken: string): string {
@@ -63,31 +82,6 @@ export class JwtTokenService implements ITokenService {
       token,
       expiresAt: new Date(exp * 1000),
     };
-  }
-
-  private decodeToken(token: string, expectedType: TokenType): TokenPayload {
-    let decoded: string | jwt.JwtPayload;
-    try {
-      decoded = jwt.verify(token, this.config.secretKey, {
-        algorithms: [this.config.jwtAlgorithm],
-      });
-    } catch {
-      throw new DomainException('Invalid or expired token', 'UNAUTHORIZED', 401);
-    }
-
-    if (typeof decoded !== 'object' || decoded === null) {
-      throw new DomainException('Invalid or expired token', 'UNAUTHORIZED', 401);
-    }
-
-    if (decoded.type !== expectedType) {
-      throw new DomainException(`Expected ${expectedType} token`, 'UNAUTHORIZED', 401);
-    }
-
-    if (typeof decoded.sub !== 'string' || !decoded.sub) {
-      throw new DomainException('Invalid or expired token', 'UNAUTHORIZED', 401);
-    }
-
-    return decoded as unknown as TokenPayload;
   }
 }
 

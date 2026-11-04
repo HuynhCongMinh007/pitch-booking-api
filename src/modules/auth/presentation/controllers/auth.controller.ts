@@ -11,7 +11,7 @@ import { RateLimit } from '../../../../shared/presentation/decorators/rate-limit
 import { JwtAuthGuard } from '../../../../shared/presentation/guards/jwt-auth.guard';
 import { RateLimitGuard } from '../../../../shared/presentation/guards/rate-limit.guard';
 import { ZodValidationPipe } from '../../../../shared/presentation/pipes/zod-validation.pipe';
-import { OAUTH_GOOGLE_COOKIE_PATH, buildCookieOptions, clearAuthCookies, setAuthCookies, } from '../../../../shared/presentation/utils/cookie.util';
+import { OAUTH_GOOGLE_COOKIE_PATH, buildCookieOptions, clearAuthCookies, setAuthCookies, } from '../utils/auth-cookie.util';
 import { GetGoogleLoginUrlUseCase } from '../../application/use-cases/get-google-login-url.use-case';
 import { GoogleExchangeUseCase } from '../../application/use-cases/google-exchange.use-case';
 import { LoginUseCase } from '../../application/use-cases/login.use-case';

@@ -1,19 +1,18 @@
 import { Global, Module } from '@nestjs/common';
 
-import { TOKEN_SERVICE } from '../../application/ports/token-service.interface';
-import { RateLimitService } from '../rate-limit/rate-limit.service';
-import { JwtTokenService } from './jwt-token.service';
+import { TOKEN_VERIFIER } from '../../application/ports/token-verifier.interface';
+import { JwtTokenVerifierService } from './jwt-token-verifier.service';
+import { RateLimitService } from './rate-limit.service';
 
 @Global()
 @Module({
   providers: [
     RateLimitService,
     {
-      provide: TOKEN_SERVICE,
-      useClass: JwtTokenService,
+      provide: TOKEN_VERIFIER,
+      useClass: JwtTokenVerifierService,
     },
   ],
-  exports: [TOKEN_SERVICE, RateLimitService],
+  exports: [TOKEN_VERIFIER, RateLimitService],
 })
 export class SecurityModule {}
-

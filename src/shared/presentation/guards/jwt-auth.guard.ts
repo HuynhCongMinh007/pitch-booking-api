@@ -2,17 +2,17 @@ import { CanActivate, ExecutionContext, Inject, Injectable } from '@nestjs/commo
 import type { Request } from 'express';
 
 import {
-  type ITokenService,
-  TOKEN_SERVICE,
-} from '../../application/ports/token-service.interface';
+  type ITokenVerifier,
+  TOKEN_VERIFIER,
+} from '../../application/ports/token-verifier.interface';
 import { DomainException } from '../../domain/exceptions/domain.exception';
 import type { AuthenticatedRequest } from '../decorators/current-user.decorator';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
   constructor(
-    @Inject(TOKEN_SERVICE)
-    private readonly tokenService: ITokenService,
+    @Inject(TOKEN_VERIFIER)
+    private readonly tokenVerifier: ITokenVerifier,
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -22,7 +22,7 @@ export class JwtAuthGuard implements CanActivate {
       throw new DomainException('Not authenticated', 'UNAUTHORIZED', 401);
     }
 
-    const payload = this.tokenService.verifyAccessToken(token);
+    const payload = this.tokenVerifier.verifyAccessToken(token);
     const userId = Number.parseInt(payload.sub, 10);
 
     request.user = {
@@ -52,4 +52,3 @@ export class JwtAuthGuard implements CanActivate {
     return null;
   }
 }
-

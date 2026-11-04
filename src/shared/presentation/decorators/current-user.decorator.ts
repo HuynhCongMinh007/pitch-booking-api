@@ -1,7 +1,7 @@
 import { ExecutionContext, createParamDecorator } from '@nestjs/common';
 import type { Request } from 'express';
 
-import type { TokenPayload } from '../../application/ports/token-service.interface';
+import type { TokenPayload } from '../../application/ports/token-verifier.interface';
 
 export interface AuthenticatedUser {
   userId: number;
@@ -21,4 +21,3 @@ export const CurrentUser = createParamDecorator(
     return field ? user?.[field] : user;
   },
 );
-

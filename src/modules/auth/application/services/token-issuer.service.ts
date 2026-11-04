@@ -1,18 +1,24 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { type ITokenService, TOKEN_SERVICE, } from '../../../../shared/application/ports/token-service.interface';
 import { RefreshTokenEntity } from '../../domain/entities/refresh-token.entity';
-import { type IRefreshTokenRepository, REFRESH_TOKEN_REPOSITORY, } from '../../domain/repositories/refresh-token.repository.interface';
+import {
+  type IRefreshTokenRepository,
+  REFRESH_TOKEN_REPOSITORY,
+} from '../../domain/repositories/refresh-token.repository.interface';
 import type { TokenResponseDto } from '../dtos/auth.dto';
+import {
+  AUTH_TOKEN_SERVICE,
+  type IAuthTokenService,
+} from '../ports/auth-token-service.interface';
 
 @Injectable()
 export class TokenIssuerService {
   constructor(
-    @Inject(TOKEN_SERVICE)
-    private readonly tokenService: ITokenService,
+    @Inject(AUTH_TOKEN_SERVICE)
+    private readonly tokenService: IAuthTokenService,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
-  ) { }
+  ) {}
 
   async issueTokens(userId: number): Promise<TokenResponseDto> {
     const access = this.tokenService.createAccessToken(userId);
@@ -34,4 +40,3 @@ export class TokenIssuerService {
     };
   }
 }
-

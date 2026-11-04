@@ -1,3 +1,4 @@
+import type { IAuthTokenService } from '../../src/modules/auth/application/ports/auth-token-service.interface';
 import type { IEmailService } from '../../src/modules/auth/application/ports/email-service.interface';
 import type { IOtpCryptoService } from '../../src/modules/auth/application/ports/otp-crypto-service.interface';
 import type { IPasswordHasher } from '../../src/modules/auth/application/ports/password-hasher.interface';
@@ -10,7 +11,6 @@ import { InvalidCredentialsException } from '../../src/modules/auth/domain/excep
 import type { IEmailOtpRepository } from '../../src/modules/auth/domain/repositories/email-otp.repository.interface';
 import type { IRefreshTokenRepository } from '../../src/modules/auth/domain/repositories/refresh-token.repository.interface';
 import type { IUserRepository } from '../../src/modules/user/domain/repositories/user.repository.interface';
-import type { ITokenService } from '../../src/shared/application/ports/token-service.interface';
 import type { IUnitOfWork } from '../../src/shared/application/ports/unit-of-work.interface';
 
 describe('Auth UseCases Unit Tests (Isolated from DB)', () => {
@@ -34,7 +34,7 @@ describe('Auth UseCases Unit Tests (Isolated from DB)', () => {
       verifyAndUpdate: jest.fn().mockResolvedValue({ valid: false, upgradedHash: null }),
     };
 
-    const tokenService = {} as ITokenService;
+    const tokenService = {} as IAuthTokenService;
     const refreshRepo = {} as IRefreshTokenRepository;
     const tokenIssuer = new TokenIssuerService(tokenService, refreshRepo);
 
@@ -101,4 +101,3 @@ describe('Auth UseCases Unit Tests (Isolated from DB)', () => {
     expect(emailService.sendPasswordResetOtpEmail).not.toHaveBeenCalled();
   });
 });
-

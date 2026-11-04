@@ -1,10 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
-  type ITokenService,
-  TOKEN_SERVICE,
-} from '../../../../shared/application/ports/token-service.interface';
-import {
   type IUnitOfWork,
   UNIT_OF_WORK,
 } from '../../../../shared/application/ports/unit-of-work.interface';
@@ -19,13 +15,17 @@ import {
   REFRESH_TOKEN_REPOSITORY,
 } from '../../domain/repositories/refresh-token.repository.interface';
 import type { RefreshTokenInput, TokenResponseDto } from '../dtos/auth.dto';
+import {
+  AUTH_TOKEN_SERVICE,
+  type IAuthTokenService,
+} from '../ports/auth-token-service.interface';
 import { TokenIssuerService } from '../services/token-issuer.service';
 
 @Injectable()
 export class RefreshTokenUseCase implements IUseCase<RefreshTokenInput, TokenResponseDto> {
   constructor(
-    @Inject(TOKEN_SERVICE)
-    private readonly tokenService: ITokenService,
+    @Inject(AUTH_TOKEN_SERVICE)
+    private readonly tokenService: IAuthTokenService,
     @Inject(REFRESH_TOKEN_REPOSITORY)
     private readonly refreshTokenRepository: IRefreshTokenRepository,
     @Inject(USER_REPOSITORY)
@@ -61,4 +61,3 @@ export class RefreshTokenUseCase implements IUseCase<RefreshTokenInput, TokenRes
     });
   }
 }
-
