@@ -8,8 +8,9 @@ import {
   Patch,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 
+import { ApiZodBody } from '../../../../shared/presentation/decorators/api-zod-body.decorator';
 import {
   type AuthenticatedUser,
   CurrentUser,
@@ -42,21 +43,7 @@ export class UserController {
 
   @Patch('me')
   @ApiOperation({ summary: 'Update current authenticated user profile' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        username: { type: 'string' },
-        full_name: { type: 'string' },
-        phone_number: { type: 'string' },
-        address: { type: 'string' },
-        avatar_url: { type: 'string' },
-        date_of_birth: { type: 'string' },
-        gender: { type: 'string' },
-        bio: { type: 'string' },
-      },
-    },
-  })
+  @ApiZodBody(updateMeRequestSchema)
   async updateMe(
     @CurrentUser() currentUser: AuthenticatedUser,
     @Body(new ZodValidationPipe(updateMeRequestSchema)) changes: UpdateMeChangesDto,

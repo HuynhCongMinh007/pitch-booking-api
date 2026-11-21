@@ -11,11 +11,12 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 
 import { DomainException } from '../../../../shared/domain/exceptions/domain.exception';
 import { AppConfigService } from '../../../../shared/infrastructure/services/app-config.service';
+import { ApiZodBody } from '../../../../shared/presentation/decorators/api-zod-body.decorator';
 import {
   type AuthenticatedUser,
   CurrentUser,
@@ -98,17 +99,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @RateLimit('REGISTER')
   @ApiOperation({ summary: 'Register a new user account with email OTP verification' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: { type: 'string' },
-        otp: { type: 'string' },
-        username: { type: 'string' },
-        password: { type: 'string' },
-      },
-    },
-  })
+  @ApiZodBody(registerRequestSchema)
   async register(
     @Body(new ZodValidationPipe(registerRequestSchema)) body: RegisterRequestDto,
     @Res({ passthrough: true }) response: Response,
@@ -129,16 +120,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit('SEND_OTP')
   @ApiOperation({ summary: 'Send OTP code for registration or password reset' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: { type: 'string' },
-        purpose: { type: 'string' },
-        resend: { type: 'boolean' },
-      },
-    },
-  })
+  @ApiZodBody(sendOtpRequestSchema)
   async sendOtp(@Body(new ZodValidationPipe(sendOtpRequestSchema)) body: SendOtpRequestDto) {
     const result = await this.sendOtpUseCase.execute(body);
     return toSendOtpResponseDto(result);
@@ -149,15 +131,7 @@ export class AuthController {
   @RateLimit('LOGIN')
   @ApiConsumes('application/json', 'application/x-www-form-urlencoded')
   @ApiOperation({ summary: 'Login with email or username and password' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        username: { type: 'string' },
-        password: { type: 'string' },
-      },
-    },
-  })
+  @ApiZodBody(loginRequestSchema)
   async login(
     @Body(new ZodValidationPipe(loginRequestSchema)) body: LoginRequestDto,
     @Res({ passthrough: true }) response: Response,
@@ -171,15 +145,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit('REFRESH')
   @ApiOperation({ summary: 'Rotate refresh token and issue a new token pair' })
-  @ApiBody({
-    required: false,
-    schema: {
-      type: 'object',
-      properties: {
-        refresh_token: { type: 'string' },
-      },
-    },
-  })
+  @ApiZodBody(refreshTokenRequestSchema, { required: false })
   async refresh(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -203,15 +169,7 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout current session and revoke refresh token' })
-  @ApiBody({
-    required: false,
-    schema: {
-      type: 'object',
-      properties: {
-        refresh_token: { type: 'string' },
-      },
-    },
-  })
+  @ApiZodBody(refreshTokenRequestSchema, { required: false })
   async logout(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -266,15 +224,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit('LOGIN')
   @ApiOperation({ summary: 'Exchange Google OAuth2 authorization code for JWT tokens' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        code: { type: 'string' },
-        state: { type: 'string' },
-      },
-    },
-  })
+  @ApiZodBody(googleExchangeRequestSchema)
   async googleExchange(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
@@ -302,16 +252,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @RateLimit('VERIFY_OTP')
   @ApiOperation({ summary: 'Reset user password using OTP code' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: { type: 'string' },
-        otp: { type: 'string' },
-        new_password: { type: 'string' },
-      },
-    },
-  })
+  @ApiZodBody(resetPasswordRequestSchema)
   resetPassword(
     @Body(new ZodValidationPipe(resetPasswordRequestSchema)) body: ResetPasswordRequestDto,
   ): Promise<MessageResponseDto> {
